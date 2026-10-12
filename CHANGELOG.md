@@ -8,6 +8,7 @@ All notable changes to DS Bot are listed here. The format follows [Keep a Change
 
 - In a Bot's chat or a group chat, `@` lists the Bots you can mention first: a group's members and **Everyone**, or the other Bots. Picking one writes `@Name`.
 - **Reference a chat** in the composer's **+** menu adds another Bot's chat, or a recent conversation outside the team, to your message as context.
+- `roomReplyTimeoutMs` in the configuration sets the timeout in milliseconds for a member's turn in a group chat (default 240,000 ms), so long-running tool calls and test suites do not time out prematurely.
 
 ### Changed
 

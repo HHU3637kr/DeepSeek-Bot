@@ -55,6 +55,9 @@ const transcript = lines => lines.map(lineText).join('\n')
 // Models often echo the transcript format ("Name: …") despite the instruction.
 export const stripOwnName = (name, text) => text.replace(new RegExp(`^\\s*\\**${escapeRegExp(name)}\\**\\s*[:：]\\s*`), '').trim()
 export const isPass = text => text === '' || /^\s*[[【(（]\s*pass\s*[\]】)）]|^\s*pass\s*[.。!！]?\s*$/i.test(text)
+export const roomReplyTimeout = config => (typeof config?.roomReplyTimeoutMs === 'number' && config.roomReplyTimeoutMs > 0
+  ? config.roomReplyTimeoutMs
+  : ROOM_REPLY_TIMEOUT_MS)
 
 // "@Name" mentions in order of appearance. Longest names match first so "@Mx" never
 // reads as "@M"; only ASCII letters and digits continue a name, so "@K你好" is K.
@@ -181,13 +184,14 @@ export function install(rt) {
     if (signal.aborted) return null
     const exchangeId = randomUUID()
     room.seen[member.id] = room.seq
+    const timeoutMs = roomReplyTimeout(rt.config)
     const done = new Promise((resolve) => {
       const finish = (value) => {
         clearTimeout(timer)
         rt.roomWaiters.delete(exchangeId)
         resolve(value)
       }
-      const timer = setTimeout(() => finish(null), ROOM_REPLY_TIMEOUT_MS)
+      const timer = setTimeout(() => finish(null), timeoutMs)
       rt.roomWaiters.set(exchangeId, { resolve: finish, fail: failure => finish({ failure }) })
       signal.addEventListener('abort', () => finish(null), { once: true })
     })

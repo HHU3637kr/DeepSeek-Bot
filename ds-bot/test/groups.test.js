@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { isPass, mentionsIn, referenceNote, stripOwnName, withoutReferences } from '../src/host/groups.js'
+import { isPass, mentionsIn, referenceNote, roomReplyTimeout, stripOwnName, withoutReferences } from '../src/host/groups.js'
 import { attachReference } from '../src/host/turns.js'
 
 const members = [{ name: 'M' }, { name: 'Mx' }, { name: 'K' }, { name: 'Writer' }]
@@ -57,3 +57,13 @@ test('a reference takes out only its own "@label", so a typed call with the same
   assert.deepEqual(names(mentionsIn(withoutReferences('@Kate, @K', [{ labels: ['K'] }]), [...members, { name: 'Kate' }])), { all: false, found: ['Kate'] })
   assert.deepEqual(names(mentionsIn(withoutReferences('@K notes and @K', [{ labels: ['K notes'] }]), members)), { all: false, found: ['K'] })
 })
+
+test('roomReplyTimeout takes custom positive ms and defaults to 240,000', () => {
+  assert.equal(roomReplyTimeout({}), 240_000)
+  assert.equal(roomReplyTimeout(undefined), 240_000)
+  assert.equal(roomReplyTimeout({ roomReplyTimeoutMs: 1_800_000 }), 1_800_000)
+  assert.equal(roomReplyTimeout({ roomReplyTimeoutMs: -1 }), 240_000)
+  assert.equal(roomReplyTimeout({ roomReplyTimeoutMs: 0 }), 240_000)
+  assert.equal(roomReplyTimeout({ roomReplyTimeoutMs: '600000' }), 240_000)
+})
+
